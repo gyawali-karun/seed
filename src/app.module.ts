@@ -9,9 +9,19 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     AuthModule,
     UtilsModule,
+    // ConfigModule.forRoot({
+    //   isGlobal: true,
+    //   envFilePath: '.env',
+    // }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      validate: (config) => {
+        if (!config.JWT_REFRESH_SECRET) {
+          throw new Error('Missing Google OAuth environment variables');
+        }
+        console.log(config);
+        return config;
+      },
     }),
   ],
   controllers: [AppController],

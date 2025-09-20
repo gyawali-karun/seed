@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const PORT = 3333;
@@ -12,6 +13,7 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: '50mb' }));
   const globalPrefix = 'api/v1';
   app.setGlobalPrefix(globalPrefix);
+  app.use(cookieParser());
 
   app.useGlobalPipes(
     new ValidationPipe({

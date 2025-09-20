@@ -24,8 +24,18 @@ model User {
   session    Session[]
   tenantUser TenantUser[]
 
-  profile   Profile? @relation(fields: [profileId], references: [id])
-  profileId String?  @unique
+  profile      Profile?       @relation(fields: [profileId], references: [id])
+  profileId    String?        @unique
+  RefreshToken RefreshToken[]
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique
+  tokenHash String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Profile {
@@ -51,7 +61,7 @@ model TenantUser {
   id       String @id @default(cuid())
   tenantId String
   userId   String
-  roleId   String
+  roleId   Int
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
@@ -61,21 +71,21 @@ model TenantUser {
 }
 
 model Role {
-  id          String           @id @default(cuid())
+  id          Int              @id @default(autoincrement())
   name        String
   permissions RolePermission[]
   TenantUser  TenantUser[]
 }
 
 model Permission {
-  id     String           @id @default(cuid())
+  id     Int              @id @default(autoincrement())
   action String           @unique
   roles  RolePermission[]
 }
 
 model RolePermission {
-  roleId       String
-  permissionId String
+  roleId       Int
+  permissionId Int
 
   role       Role       @relation(fields: [roleId], references: [id])
   permission Permission @relation(fields: [permissionId], references: [id])
@@ -84,7 +94,7 @@ model RolePermission {
 }
 
 model Session {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   userId    String
   token     String   @unique
   createdAt DateTime @default(now())
