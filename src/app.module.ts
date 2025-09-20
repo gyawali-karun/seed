@@ -4,6 +4,9 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UtilsModule } from './common/utils/utils.module';
 import { ConfigModule } from '@nestjs/config';
+import { TenantModule } from './tenant/tenant.module';
+import { RoleModule } from './role/role.module';
+import { RolePermissionModule } from './role-permission/role-permission.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { ConfigModule } from '@nestjs/config';
         return config;
       },
     }),
+    TenantModule,
+    RoleModule,
+    RolePermissionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
