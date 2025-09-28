@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-interface TokenPayload {
-  sub: string;
+export interface TokenPayload {
+  id: string;
   email: string;
   firstName: string | null | undefined;
   lastName: string | null | undefined;
@@ -60,7 +60,6 @@ export class UtilsService {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
 
-    console.log('s', k);
     return k;
   }
 }

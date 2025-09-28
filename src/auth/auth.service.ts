@@ -7,11 +7,12 @@ import {
 import { LoginUserDto, RegisterUserDto } from './dto/register-user.dto';
 import { UpdateRegisterDto } from './dto/update-register.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RefreshToken, User } from 'generated/prisma';
-import { UtilsService } from 'src/common/utils/utils.service';
+import { RefreshToken, Tenant, User } from 'generated/prisma';
+import { TokenPayload, UtilsService } from 'src/common/utils/utils.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { TenantService } from 'src/tenant/tenant.service';
 
 @Injectable()
 export class AuthService {
@@ -20,11 +21,12 @@ export class AuthService {
     private readonly utils: UtilsService,
     private jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly tenantService: TenantService,
   ) {}
   async register(dto: RegisterUserDto): Promise<User | null> {
     const { email, password, profile } = dto;
     const hashPassword = await this.utils.hashPassword(password);
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         email,
         password: hashPassword,
@@ -36,6 +38,20 @@ export class AuthService {
         },
       },
     });
+
+    if (dto.tenantName) {
+      const tenant: Tenant = await this.tenantService.create({
+        name: dto.tenantName,
+      });
+      // await this.tenantService.createTenantUser({
+      //   tenantId: tenant.id,
+      //   userId: user.id,
+      //   roleId: 1,
+      // });
+
+      return this.findById(user.id);
+    }
+    return user;
   }
 
   async login(dto: LoginUserDto, res: Response) {
@@ -46,7 +62,7 @@ export class AuthService {
 
     await this.utils.valdateUser(password as string, getUser?.password);
     const payload = {
-      sub: getUser.id,
+      id: getUser.id,
       email: getUser.email,
       firstName: getUser.profile?.firstName,
       lastName: getUser.profile?.lastName,
@@ -83,7 +99,7 @@ export class AuthService {
       if (!getUser) throw new UnauthorizedException('User not found');
 
       const payload = {
-        sub: getUser.id,
+        id: getUser.id,
         email: getUser.email,
         firstName: getUser?.profile?.firstName,
         lastName: getUser?.profile?.lastName,
@@ -175,6 +191,25 @@ export class AuthService {
       },
       orderBy: {
         createdAt: 'desc',
+      },
+    });
+  }
+
+  getProfile(user: TokenPayload) {
+    return this.prisma.user.findUnique({
+      where: {
+        id: user.id,
+      },
+      include: {
+        profile: true,
+      },
+    });
+  }
+
+  logout(userId: string) {
+    return this.prisma.refreshToken.deleteMany({
+      where: {
+        userId,
       },
     });
   }

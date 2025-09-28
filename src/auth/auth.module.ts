@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from 'src/common/strategy/jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtRefreshStrategy } from 'src/common/strategy/refresh.strategy';
+import { TenantModule } from 'src/tenant/tenant.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { JwtRefreshStrategy } from 'src/common/strategy/refresh.strategy';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    TenantModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy],

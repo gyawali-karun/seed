@@ -50,6 +50,10 @@ export class RegisterUserDto {
   @ValidateNested()
   @Type(() => CreateProfileDto)
   profile?: CreateProfileDto;
+
+  @IsOptional()
+  @IsString()
+  tenantName?: string;
 }
 
 export class LoginUserDto extends PartialType(RegisterUserDto) {}
